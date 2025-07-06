@@ -1,6 +1,10 @@
 package org.dacodia.afmp;
 
+import org.dacodia.afmp.voronoi.Cell;
+import org.dacodia.afmp.voronoi.Vertice;
+import org.dacodia.afmp.voronoi.Voronoi;
 import org.waveware.delaunator.DPoint;
+import org.waveware.delaunator.Delaunator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +17,8 @@ public class Grid {
     int cellsX, cellsY;
     long cellsDesired, seed;
     List<DPoint> boundary, points;
-    int[] cells, vertices;
+    List<Cell> cells;
+    List<Vertice> vertices;
 
     //generate grid
     public Grid(int seed, long numPoints, long graphWidth, long graphHeight) {
@@ -28,7 +33,12 @@ public class Grid {
         cellsY = (int) Math.floor((graphHeight + 0.5 * spacing - 1e-10) / spacing);
 
         List<DPoint> allPoints = Stream.concat(points.stream(), boundary.stream()).toList();
+        Delaunator delaunay = new Delaunator(allPoints);
 
+        Voronoi voronoi = new Voronoi(delaunay, allPoints, points.size());
+
+        cells = voronoi.getCells();
+        vertices = voronoi.getVertices();
     }
 
     private List<DPoint> getJitteredGrid(long width, long height, double spacing) {
